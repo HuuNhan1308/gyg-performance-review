@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Điều Khiển Tiếng Nói Khách Hàng - Báo Cáo Điều Hành</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a5f 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #2c5aa0;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #2c5aa0;
+            background: #e6e9ff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .dashboard-content {
+            display: none;
+        }
+
+        .dashboard-content.show {
+            display: block;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #2c5aa0;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 5px;
+        }
+
+        .kpi-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-card.tags-chart {
+            min-height: 600px;
+        }
+
+        .chart-card canvas {
+            max-height: 500px;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .top-tours {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .top-tours-list {
+            list-style: none;
+        }
+
+        .top-tours-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .top-tours-item:last-child {
+            border-bottom: none;
+        }
+
+        .tour-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .complaint-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none;
+            border-color: #2c5aa0;
+        }
+
+        .btn {
+            background: #2c5aa0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #1e3a5f;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .data-table-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-table th:hover {
+            background: #e9ecef;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9ff;
+            cursor: pointer;
+        }
+
+        .tag-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            margin: 4px;
+            font-weight: 500;
+        }
+
+        .source-label {
+            display: inline-block;
+            background: #f3e5f5;
+            color: #7b1fa2;
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            margin: 4px;
+            font-weight: 500;
+        }
+
+        .high-complaints {
+            background: #ffebee !important;
+            border-left: 4px solid #f44336;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            max-width: 1200px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+            padding: 8px;
+            line-height: 1;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            color: #333;
+            background: #f0f0f0;
+        }
+
+        .detail-field {
+            margin-bottom: 25px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+        }
+
+        .detail-value {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #2c5aa0;
+            font-size: 1rem;
+        }
+
+        .conversation-text {
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1.35rem;
+            line-height: 2.1;
+            color: #1a1a1a;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            border-left: 5px solid #2c5aa0;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .translation-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .translation-tab {
+            padding: 14px 28px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .translation-tab:hover {
+            color: #2c5aa0;
+            background: #f0f0f0;
+        }
+
+        .translation-tab.active {
+            color: #2c5aa0;
+            border-bottom-color: #2c5aa0;
+            background: #f8f9ff;
+        }
+
+        .translation-content {
+            display: none;
+        }
+
+        .translation-content.active {
+            display: block;
+        }
+
+        .btn-translate {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-right: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-translate:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-translate:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-copy {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-copy:hover {
+            background: #0b7dda;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .translation-loading {
+            display: none;
+            align-items: center;
+            gap: 15px;
+            color: #666;
+            font-style: italic;
+            font-size: 1.1rem;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .translation-loading.show {
+            display: flex;
+        }
+
+        .translation-loading .spinner {
+            width: 24px;
+            height: 24px;
+            margin: 0;
+            border-width: 3px;
+        }
+
+        .translation-status {
+            margin-top: 15px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: none;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .translation-status.show {
+            display: block;
+        }
+
+        .translation-status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+
+        .translation-status.info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left: 4px solid #2196F3;
+        }
+
+        .translation-status.error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2c5aa0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert.error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+
+        .alert.success {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .sort-indicator {
+            margin-left: 5px;
+            opacity: 0.5;
+        }
+
+        .sort-indicator.active {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-card.tags-chart {
+                min-height: 500px;
+            }
+            
+            .chart-card canvas {
+                max-height: 400px;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-content {
+                margin: 10px;
+                width: calc(100% - 20px);
+                padding: 25px;
+            }
+
+            .conversation-text {
+                font-size: 1.2rem;
+                padding: 20px;
+                line-height: 1.9;
+                letter-spacing: 0.2px;
+            }
+
+            .btn-translate, .btn-copy {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+
+            .translation-tab {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📈 Bảng Điều Khiển Tiếng Nói Khách Hàng</h1>
+            <div class="nav-links">
+                <a href="/consolidate">📊 Giai đoạn 1 - Tổng hợp dữ liệu</a>
+                <a href="/dashboard" class="active">📈 Giai đoạn 2 - Bảng điều khiển</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="alert" id="alert">
+            <span id="alertMessage"></span>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <h2>📤 Tải lên File Excel đã Tổng hợp</h2>
+            <p style="margin: 10px 0; color: #666;">Hệ thống đang tự động tải dữ liệu mẫu. Bạn cũng có thể tải lên file khác nếu muốn.</p>
+            
+            <div class="upload-area" id="uploadArea">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📊</div>
+                <h3>Kéo thả file Excel đã tổng hợp vào đây hoặc nhấp để chọn file</h3>
+                <p>Định dạng mong đợi: Đầu ra từ Giai đoạn 1 với dữ liệu booking đã được hợp nhất</p>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx">
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content" id="dashboardContent">
+            <!-- KPI Section -->
+            <div class="kpi-grid" id="kpiGrid">
+                <!-- KPI cards will be populated by JavaScript -->
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-card tags-chart">
+                    <div class="chart-title">📊 Khiếu nại theo Tag</div>
+                    <canvas id="tagChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">🔍 Khiếu nại theo Nguồn</div>
+                    <canvas id="sourceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Tours Section -->
+            <div class="top-tours">
+                <div class="chart-title">🏆 Tour có nhiều khiếu nại nhất</div>
+                <ul class="top-tours-list" id="topToursList">
+                    <!-- Will be populated by JavaScript -->
+                </ul>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="tourFilter">Tour</label>
+                        <input type="text" id="tourFilter" placeholder="Lọc theo tên tour...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="tagFilter">Tag</label>
+                        <input type="text" id="tagFilter" placeholder="Lọc theo tag...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="sourceFilter">Nguồn</label>
+                        <select id="sourceFilter">
+                            <option value="">Tất cả nguồn</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateFromFilter">Từ ngày</label>
+                        <input type="date" id="dateFromFilter">
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateToFilter">Đến ngày</label>
+                        <input type="date" id="dateToFilter">
+                    </div>
+                    <div class="filter-group">
+                        <label for="keywordFilter">Tìm kiếm từ khóa</label>
+                        <input type="text" id="keywordFilter" placeholder="Tìm kiếm trong tất cả trường...">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <div>
+                            <button class="btn" onclick="applyFilters()">Áp dụng bộ lọc</button>
+                            <button class="btn btn-secondary" onclick="clearFilters()">Xóa bộ lọc</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table Section -->
+            <div class="data-table-section">
+                <div class="table-header">
+                    <div class="table-title">📋 Chi tiết Booking</div>
+                    <div id="recordCount">0 bản ghi</div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('supplierId')">
+                                    Nhà cung cấp <span class="sort-indicator">↕️</span>
+                                </th>
+                                <th onclick="sortTable('tourTitle')">
+                                    Tên tour <span class="sort-indicator">↕️</span>
+                                </th>
+                                <th onclick="sortTable('bookingId')">
+                                    Mã booking <span class="sort-indicator">↕️</span>
+                                </th>
+                                <th onclick="sortTable('checkoutDate')">
+                                    Ngày checkout <span class="sort-indicator">↕️</span>
+                                </th>
+                                <th>Nguồn phản hồi</th>
+                                <th>Tag khiếu nại</th>
+                                <th onclick="sortTable('complaintCount')">
+                                    Số lượng khiếu nại <span class="sort-indicator">↕️</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Chi tiết khiếu nại</div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = [];
+        let filteredData = [];
+        let sortColumn = '';
+        let sortDirection = 'asc';
+        let tagChart, sourceChart;
+
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const alert = document.getElementById('alert');
+        const alertMessage = document.getElementById('alertMessage');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadDefaultData();
+        });
+
+        function setupEventListeners() {
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleFileDrop);
+            fileInput.addEventListener('change', handleFileSelect);
+        }
+
+        async function loadDefaultData() {
+            showLoading();
+            hideAlert();
+
+            try {
+                const response = await fetch('/api/dashboard/load-default');
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error);
+                }
+
+                currentData = result.data;
+                filteredData = [...currentData];
+                
+                displayDashboard(result);
+                hideLoading();
+
+            } catch (error) {
+                hideLoading();
+                showAlert('Tải dữ liệu thất bại: ' + error.message + '. Vui lòng tải lên file của bạn.', 'error');
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        }
+
+        async function handleFile(file) {
+            if (!file.name.toLowerCase().endsWith('.xlsx')) {
+                showAlert('Vui lòng chọn file Excel hợp lệ (.xlsx)', 'error');
+                return;
+            }
+
+            showLoading();
+            hideAlert();
+
+            try {
+                const formData = new FormData();
+                formData.append('excelFile', file);
+
+                const response = await fetch('/api/dashboard/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error);
+                }
+
+                currentData = result.data;
+                filteredData = [...currentData];
+                
+                displayDashboard(result);
+                hideLoading();
+
+            } catch (error) {
+                hideLoading();
+                showAlert('Tải lên thất bại: ' + error.message, 'error');
+            }
+        }
+
+        function displayDashboard(result) {
+            uploadSection.style.display = 'none';
+            dashboardContent.classList.add('show');
+            
+            displayKPIs(result.kpis);
+            displayCharts(result.charts);
+            populateFilterOptions();
+            displayDataTable();
+        }
+
+        function displayKPIs(kpis) {
+            const kpiGrid = document.getElementById('kpiGrid');
+            kpiGrid.innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-value">${kpis.totalBookings.toLocaleString()}</div>
+                    <div class="kpi-label">Tổng số booking có khiếu nại</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">${kpis.totalComplaints.toLocaleString()}</div>
+                    <div class="kpi-label">Tổng số khiếu nại</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">${kpis.uniqueTours.toLocaleString()}</div>
+                    <div class="kpi-label">Số lượng tour bị ảnh hưởng</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">${kpis.uniqueTags.toLocaleString()}</div>
+                    <div class="kpi-label">Số lượng tag khiếu nại</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">${kpis.averageComplaintsPerBooking}</div>
+                    <div class="kpi-label">Trung bình khiếu nại/Booking</div>
+                </div>
+            `;
+        }
+
+        function displayCharts(charts) {
+            // Tag Chart
+            const tagCtx = document.getElementById('tagChart').getContext('2d');
+            if (tagChart) tagChart.destroy();
+            tagChart = new Chart(tagCtx, {
+                type: 'bar',
+                data: {
+                    labels: charts.tagChart.labels,
+                    datasets: [{
+                        label: 'Khiếu nại',
+                        data: charts.tagChart.data,
+                        backgroundColor: '#2c5aa0',
+                        borderColor: '#1e3a5f',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // This makes it a horizontal bar chart
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                maxRotation: 0,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            right: 10
+                        }
+                    }
+                }
+            });
+
+            // Source Chart
+            const sourceCtx = document.getElementById('sourceChart').getContext('2d');
+            if (sourceChart) sourceChart.destroy();
+            sourceChart = new Chart(sourceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: charts.sourceChart.labels,
+                    datasets: [{
+                        data: charts.sourceChart.data,
+                        backgroundColor: [
+                            '#2c5aa0',
+                            '#ff6b6b',
+                            '#4ecdc4',
+                            '#45b7d1',
+                            '#f9ca24',
+                            '#6c5ce7'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+            // Top Tours
+            const topToursList = document.getElementById('topToursList');
+            topToursList.innerHTML = charts.topTours.map(item => `
+                <li class="top-tours-item">
+                    <span class="tour-name">${item.tour}</span>
+                    <span class="complaint-badge">${item.count} khiếu nại</span>
+                </li>
+            `).join('');
+        }
+
+        function populateFilterOptions() {
+            const sourceFilter = document.getElementById('sourceFilter');
+            const allSources = [...new Set(currentData.flatMap(record => 
+                record.sourceMerged ? record.sourceMerged.split(';').map(s => s.trim()) : []
+            ))].sort();
+
+            sourceFilter.innerHTML = '<option value="">Tất cả nguồn</option>' +
+                allSources.map(source => `<option value="${source}">${source}</option>`).join('');
+        }
+
+        function displayDataTable() {
+            const tableBody = document.getElementById('tableBody');
+            const recordCount = document.getElementById('recordCount');
+            
+            recordCount.textContent = `${filteredData.length} bản ghi`;
+            
+            tableBody.innerHTML = filteredData.map(record => `
+                <tr onclick="showDetails('${record.bookingId}')" 
+                    class="${record.complaintCount > 3 ? 'high-complaints' : ''}">
+                    <td>${record.supplierId}</td>
+                    <td>${record.tourTitle}</td>
+                    <td>${record.bookingId}</td>
+                    <td>${formatDate(record.checkoutDate)}</td>
+                    <td>${formatSources(record.sourceMerged)}</td>
+                    <td>${formatTags(record.tagsMerged)}</td>
+                    <td><strong>${record.complaintCount}</strong></td>
+                </tr>
+            `).join('');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString();
+            } catch {
+                return dateString;
+            }
+        }
+
+        function formatSources(sources) {
+            if (!sources) return '';
+            return sources.split(';').map(source => 
+                `<span class="source-label">${source.trim()}</span>`
+            ).join('');
+        }
+
+        function formatTags(tags) {
+            if (!tags) return '';
+            return tags.split(';').slice(0, 3).map(tag => 
+                `<span class="tag-badge">${tag.trim()}</span>`
+            ).join('') + (tags.split(';').length > 3 ? '<span class="tag-badge">...</span>' : '');
+        }
+
+        async function applyFilters() {
+            const filters = {
+                tour: document.getElementById('tourFilter').value,
+                tag: document.getElementById('tagFilter').value,
+                source: document.getElementById('sourceFilter').value,
+                dateFrom: document.getElementById('dateFromFilter').value,
+                dateTo: document.getElementById('dateToFilter').value,
+                keyword: document.getElementById('keywordFilter').value
+            };
+
+            try {
+                const response = await fetch('/api/dashboard/filter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        data: currentData,
+                        filters: filters
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error);
+                }
+
+                filteredData = result.data;
+                displayKPIs(result.kpis);
+                displayCharts(result.charts);
+                displayDataTable();
+
+            } catch (error) {
+                showAlert('Filter failed: ' + error.message, 'error');
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('tourFilter').value = '';
+            document.getElementById('tagFilter').value = '';
+            document.getElementById('sourceFilter').value = '';
+            document.getElementById('dateFromFilter').value = '';
+            document.getElementById('dateToFilter').value = '';
+            document.getElementById('keywordFilter').value = '';
+
+            filteredData = [...currentData];
+            displayDataTable();
+            
+            // Recalculate KPIs and charts for full data
+            const kpis = {
+                totalBookings: currentData.length,
+                totalComplaints: currentData.reduce((sum, record) => sum + record.complaintCount, 0),
+                uniqueTours: new Set(currentData.map(record => record.tourTitle)).size,
+                uniqueTags: new Set(currentData.flatMap(record => 
+                    record.tagsMerged ? record.tagsMerged.split(';').map(tag => tag.trim()).filter(tag => tag) : []
+                )).size,
+                averageComplaintsPerBooking: (currentData.reduce((sum, record) => sum + record.complaintCount, 0) / currentData.length).toFixed(1)
+            };
+            
+            displayKPIs(kpis);
+        }
+
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            filteredData.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                if (column === 'checkoutDate') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                } else if (column === 'complaintCount') {
+                    aVal = parseInt(aVal);
+                    bVal = parseInt(bVal);
+                }
+
+                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            displayDataTable();
+            updateSortIndicators();
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                indicator.classList.remove('active');
+                indicator.textContent = '↕️';
+            });
+
+            const activeHeader = document.querySelector(`th[onclick="sortTable('${sortColumn}')"] .sort-indicator`);
+            if (activeHeader) {
+                activeHeader.classList.add('active');
+                activeHeader.textContent = sortDirection === 'asc' ? '↑' : '↓';
+            }
+        }
+
+        function showDetails(bookingId) {
+            const record = currentData.find(r => r.bookingId === bookingId);
+            if (!record) return;
+
+            const modalBody = document.getElementById('modalBody');
+            const hasConversation = record.conversationText && record.conversationText.trim();
+            
+            modalBody.innerHTML = `
+                <div class="detail-field">
+                    <div class="detail-label">Mã booking</div>
+                    <div class="detail-value">${record.bookingId}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">Tên tour</div>
+                    <div class="detail-value">${record.tourTitle}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">Nhà cung cấp</div>
+                    <div class="detail-value">${record.supplierId}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">Ngày checkout</div>
+                    <div class="detail-value">${formatDate(record.checkoutDate)}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">Nguồn phản hồi</div>
+                    <div class="detail-value">${formatSources(record.sourceMerged)}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">Tag khiếu nại</div>
+                    <div class="detail-value">${record.tagsMerged ? record.tagsMerged.split(';').map(tag => 
+                        `<span class="tag-badge">${tag.trim()}</span>`
+                    ).join('') : 'Không có tag'}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">Số lượng khiếu nại</div>
+                    <div class="detail-value"><strong>${record.complaintCount}</strong></div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">Nội dung phản hồi</div>
+                    <div style="margin-top: 15px;">
+                        ${hasConversation ? `
+                            <div style="margin-bottom: 15px;">
+                                <button class="btn-translate" onclick="translateConversation('${record.bookingId}')" id="translateBtn">
+                                    🌐 Dịch sang tiếng Việt
+                                </button>
+                                <button class="btn-copy" onclick="copyTranslation()" id="copyBtn" style="display: none;">
+                                    📋 Sao chép bản dịch
+                                </button>
+                            </div>
+                            <div class="translation-loading" id="translationLoading">
+                                <div class="spinner"></div>
+                                <span>Đang dịch...</span>
+                            </div>
+                            <div class="translation-status" id="translationStatus"></div>
+                            <div class="translation-tabs" id="translationTabs" style="display: none;">
+                                <button class="translation-tab active" onclick="switchTab('original', event)">Nội dung gốc</button>
+                                <button class="translation-tab" onclick="switchTab('translated', event)">Bản dịch tiếng Việt</button>
+                            </div>
+                        ` : ''}
+                        <div class="translation-content active" id="originalContent">
+                            <div class="conversation-text">${hasConversation ? record.conversationText : 'Không có nội dung phản hồi'}</div>
+                        </div>
+                        <div class="translation-content" id="translatedContent">
+                            <div class="conversation-text" id="translatedText"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        function showLoading() {
+            uploadSection.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Đang xử lý file Excel của bạn...</p>
+                </div>
+            `;
+        }
+
+        function hideLoading() {
+            // Loading will be hidden when dashboard is displayed
+        }
+
+        function showAlert(message, type) {
+            alertMessage.textContent = message;
+            alert.className = 'alert show ' + type;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        function hideAlert() {
+            alert.classList.remove('show');
+        }
+
+        // Translation functions
+        async function translateConversation(bookingId) {
+            const record = currentData.find(r => r.bookingId === bookingId);
+            if (!record || !record.conversationText) return;
+
+            const translateBtn = document.getElementById('translateBtn');
+            const translationLoading = document.getElementById('translationLoading');
+            const translationStatus = document.getElementById('translationStatus');
+            const translationTabs = document.getElementById('translationTabs');
+            const translatedText = document.getElementById('translatedText');
+            const copyBtn = document.getElementById('copyBtn');
+
+            // Disable button and show loading
+            translateBtn.disabled = true;
+            translationLoading.classList.add('show');
+            translationStatus.classList.remove('show');
+
+            try {
+                const response = await fetch('/api/translate-conversation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: record.conversationText,
+                        source: record.sourceMerged,
+                        tags: record.tagsMerged || ''
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Không thể dịch');
+                }
+
+                // Hide loading
+                translationLoading.classList.remove('show');
+
+                // Check if already Vietnamese
+                if (result.alreadyVietnamese) {
+                    translationStatus.className = 'translation-status show info';
+                    translationStatus.textContent = result.message || 'Nội dung đã là tiếng Việt';
+                    translateBtn.disabled = false;
+                    return;
+                }
+
+                // Display translated text
+                translatedText.textContent = result.translatedText;
+                
+                // Show tabs and success message
+                translationTabs.style.display = 'flex';
+                copyBtn.style.display = 'inline-block';
+                translationStatus.className = 'translation-status show success';
+                translationStatus.textContent = '✓ Dịch thành công';
+                
+                // Auto-switch to translated tab
+                switchTab('translated');
+
+                // Hide success message after 3 seconds
+                setTimeout(() => {
+                    translationStatus.classList.remove('show');
+                }, 3000);
+
+            } catch (error) {
+                translationLoading.classList.remove('show');
+                translationStatus.className = 'translation-status show error';
+                translationStatus.textContent = error.message || 'Không thể dịch. Vui lòng thử lại sau.';
+                translateBtn.disabled = false;
+            }
+        }
+
+        function switchTab(tabName, event) {
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.translation-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // If event is provided, use event.target, otherwise find tab by data attribute
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Find and activate the correct tab based on tabName
+                tabs.forEach(tab => {
+                    const tabText = tab.textContent.toLowerCase();
+                    if ((tabName === 'original' && tabText.includes('gốc')) ||
+                        (tabName === 'translated' && tabText.includes('dịch'))) {
+                        tab.classList.add('active');
+                    }
+                });
+            }
+
+            // Update content
+            const contents = document.querySelectorAll('.translation-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            if (tabName === 'original') {
+                document.getElementById('originalContent').classList.add('active');
+            } else {
+                document.getElementById('translatedContent').classList.add('active');
+            }
+        }
+
+        function copyTranslation() {
+            const translatedText = document.getElementById('translatedText').textContent;
+            
+            navigator.clipboard.writeText(translatedText).then(() => {
+                const copyBtn = document.getElementById('copyBtn');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ Đã sao chép';
+                copyBtn.style.background = '#4caf50';
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.background = '#2196F3';
+                }, 2000);
+            }).catch(err => {
+                alert('Không thể sao chép: ' + err.message);
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

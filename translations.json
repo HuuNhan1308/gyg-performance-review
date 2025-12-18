@@ -1,0 +1,29 @@
+{
+  "sources": {
+    "relay": "Tin nhắn khách hàng",
+    "care_chat": "Hỗ trợ khách hàng",
+    "review": "Review"
+  },
+  "tags": {
+    "Unclear Pickup Information": "Thông tin đón khách không rõ ràng",
+    "Supplier Not Responsive": "Nhà cung cấp không phản hồi",
+    "Activity Not As Advertised": "Hoạt động không đúng như quảng cáo",
+    "Pickup/Guide Late or No Show": "Đón khách/Hướng dẫn viên trễ hoặc không đến",
+    "Too Crowded": "Quá đông đúc",
+    "Safety Equipment Not Available": "Thiết bị an toàn không có sẵn",
+    "Duration Not As Advertised": "Thời lượng không đúng như quảng cáo",
+    "Unclear Meeting Point Location": "Địa điểm tập trung không rõ ràng",
+    "Aggressive Abusive Behaviour": "Hành vi hung hăng, lạm dụng",
+    "Change Drop Off Location": "Thay đổi địa điểm trả khách",
+    "Discriminating Behavior": "Hành vi phân biệt đối xử",
+    "Food or Drinks Low Quality or Not As Advertised": "Đồ ăn/thức uống chất lượng kém hoặc không đúng quảng cáo",
+    "Unexpected Change to Activity": "Thay đổi hoạt động bất ngờ",
+    "Change Pick Up Time": "Thay đổi giờ đón khách",
+    "Accident Injury": "Tai nạn/Chấn thương",
+    "Unsafe Environment": "Môi trường không an toàn",
+    "Unsafe Driving": "Lái xe không an toàn",
+    "Guide Language Wrong or Low Proficiency": "Ngôn ngữ hướng dẫn viên sai hoặc trình độ thấp",
+    "Scam Fraud": "Lừa đảo/Gian lận",
+    "Damage To Belongings": "Hư hỏng tài sản cá nhân"
+  }
+}

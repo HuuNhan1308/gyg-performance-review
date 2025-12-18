@@ -1,0 +1,40 @@
+{
+  "name": "customer-voice-consolidation-tool",
+  "version": "1.0.0",
+  "description": "Full platform for Customer Voice data: Phase 1 consolidates duplicate bookings with Vietnamese translation, Phase 2 provides executive dashboard and reporting",
+  "main": "index.js",
+  "bin": {
+    "cv-consolidate": "./cli.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "cli": "node cli.js",
+    "web": "node server.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "excel",
+    "customer-voice",
+    "data-consolidation",
+    "booking-management",
+    "complaint-analysis",
+    "dashboard",
+    "business-intelligence",
+    "executive-reporting",
+    "data-visualization"
+  ],
+  "author": "Nhan Ho",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "commander": "^11.1.0",
+    "dotenv": "^17.2.3",
+    "exceljs": "^4.4.0",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

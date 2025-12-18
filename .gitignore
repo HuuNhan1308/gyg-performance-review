@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Uploads directory (user-uploaded files)
+uploads/
+!uploads/.gitkeep
+
+# Excel files (samples and generated files)
+*.xlsx
+*.xls
+*.xlsm
+!sample_customer_voice_data.xlsx
+!sample_consolidated_full.xlsx
+!sample_consolidated_smart.xlsx
+
+# Logs
+logs/
+*.log
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Coverage and test outputs
+coverage/
+.nyc_output/
+test-results/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
