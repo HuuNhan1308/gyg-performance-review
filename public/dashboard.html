@@ -27,7 +27,7 @@
         }
 
         .header-content {
-            max-width: 1200px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
@@ -60,7 +60,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -270,6 +270,7 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            margin-bottom: 80px;
         }
 
         .table-header {
@@ -697,11 +698,7 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <h1>📈 Bảng Điều Khiển Tiếng Nói Khách Hàng</h1>
-            <div class="nav-links">
-                <a href="/consolidate">📊 Giai đoạn 1 - Tổng hợp dữ liệu</a>
-                <a href="/dashboard" class="active">📈 Giai đoạn 2 - Bảng điều khiển</a>
-            </div>
+            <h1>📈 Customer Voice Dashboard</h1>
         </div>
     </div>
 
@@ -799,9 +796,6 @@
                     <table class="data-table" id="dataTable">
                         <thead>
                             <tr>
-                                <th onclick="sortTable('supplierId')">
-                                    Nhà cung cấp <span class="sort-indicator">↕️</span>
-                                </th>
                                 <th onclick="sortTable('tourTitle')">
                                     Tên tour <span class="sort-indicator">↕️</span>
                                 </th>
@@ -813,9 +807,6 @@
                                 </th>
                                 <th>Nguồn phản hồi</th>
                                 <th>Tag khiếu nại</th>
-                                <th onclick="sortTable('complaintCount')">
-                                    Số lượng khiếu nại <span class="sort-indicator">↕️</span>
-                                </th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -1090,15 +1081,12 @@
             recordCount.textContent = `${filteredData.length} bản ghi`;
             
             tableBody.innerHTML = filteredData.map(record => `
-                <tr onclick="showDetails('${record.bookingId}')" 
-                    class="${record.complaintCount > 3 ? 'high-complaints' : ''}">
-                    <td>${record.supplierId}</td>
+                <tr onclick="showDetails('${record.bookingId}')">
                     <td>${record.tourTitle}</td>
                     <td>${record.bookingId}</td>
                     <td>${formatDate(record.checkoutDate)}</td>
                     <td>${formatSources(record.sourceMerged)}</td>
                     <td>${formatTags(record.tagsMerged)}</td>
-                    <td><strong>${record.complaintCount}</strong></td>
                 </tr>
             `).join('');
         }
@@ -1205,9 +1193,6 @@
                 if (column === 'checkoutDate') {
                     aVal = new Date(aVal);
                     bVal = new Date(bVal);
-                } else if (column === 'complaintCount') {
-                    aVal = parseInt(aVal);
-                    bVal = parseInt(bVal);
                 }
 
                 if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
@@ -1249,10 +1234,6 @@
                     <div class="detail-value">${record.tourTitle}</div>
                 </div>
                 <div class="detail-field">
-                    <div class="detail-label">Nhà cung cấp</div>
-                    <div class="detail-value">${record.supplierId}</div>
-                </div>
-                <div class="detail-field">
                     <div class="detail-label">Ngày checkout</div>
                     <div class="detail-value">${formatDate(record.checkoutDate)}</div>
                 </div>
@@ -1265,10 +1246,6 @@
                     <div class="detail-value">${record.tagsMerged ? record.tagsMerged.split(';').map(tag => 
                         `<span class="tag-badge">${tag.trim()}</span>`
                     ).join('') : 'Không có tag'}</div>
-                </div>
-                <div class="detail-field">
-                    <div class="detail-label">Số lượng khiếu nại</div>
-                    <div class="detail-value"><strong>${record.complaintCount}</strong></div>
                 </div>
                 <div class="detail-field">
                     <div class="detail-label">Nội dung phản hồi</div>

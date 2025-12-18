@@ -3,8 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const ExcelJS = require('exceljs');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const CustomerVoiceConsolidator = require('./consolidator');
+const { GoogleGenAI } = require('@google/genai');
 require('dotenv').config();
 
 const app = express();
@@ -52,138 +51,14 @@ app.use(express.json());
 
 // Routes
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-app.get('/consolidate', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.post('/api/analyze', upload.single('excelFile'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'Không có file nào được tải lên' });
-        }
-
-        const consolidator = new CustomerVoiceConsolidator();
-        const ExcelJS = require('exceljs');
-        
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(req.file.path);
-        const worksheet = workbook.getWorksheet(1);
-        const data = consolidator.extractData(worksheet);
-
-        // Analyze duplicates
-        const bookingCounts = {};
-        data.forEach(record => {
-            bookingCounts[record.bookingId] = (bookingCounts[record.bookingId] || 0) + 1;
-        });
-
-        const duplicates = Object.entries(bookingCounts)
-            .filter(([_, count]) => count > 1)
-            .sort(([, a], [, b]) => b - a);
-
-        const totalDuplicateRecords = duplicates.reduce((sum, [, count]) => sum + count, 0);
-        const potentialReduction = totalDuplicateRecords - duplicates.length;
-
-        // Clean up uploaded file
-        fs.unlinkSync(req.file.path);
-
-        res.json({
-            totalRecords: data.length,
-            uniqueBookingIds: Object.keys(bookingCounts).length,
-            duplicateBookingIds: duplicates.length,
-            topDuplicates: duplicates.slice(0, 10),
-            potentialReduction: potentialReduction,
-            reductionPercentage: data.length > 0 ? (potentialReduction / data.length * 100).toFixed(1) : 0
-        });
-
-    } catch (error) {
-        console.error('Analysis error:', error);
-        if (req.file) {
-            fs.unlinkSync(req.file.path);
-        }
-        res.status(500).json({ error: 'Phân tích thất bại: ' + error.message });
-    }
-});
-
-app.post('/api/process', upload.single('excelFile'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'Không có file nào được tải lên' });
-        }
-
-        const { 
-            mergeMode = 'full', 
-            separator = ';',
-            enableTranslation = 'false',
-            translationMode = 'dictionary',
-            outputFormat = 'vietnamese-only'
-        } = req.body;
-        
-        const consolidator = new CustomerVoiceConsolidator({
-            mergeMode,
-            separator,
-            enableTranslation: enableTranslation === 'true',
-            translationMode,
-            outputFormat
-        });
-
-        const outputFilename = `consolidated_${Date.now()}_${req.file.originalname}`;
-        const outputPath = path.join(uploadsDir, outputFilename);
-
-        const result = await consolidator.processFile(req.file.path, outputPath);
-
-        // Clean up input file
-        fs.unlinkSync(req.file.path);
-
-        res.json({
-            success: true,
-            result: result,
-            downloadUrl: `/api/download/${outputFilename}`
-        });
-
-    } catch (error) {
-        console.error('Processing error:', error);
-        if (req.file) {
-            fs.unlinkSync(req.file.path);
-        }
-        res.status(500).json({ error: 'Xử lý thất bại: ' + error.message });
-    }
-});
-
-app.get('/api/download/:filename', (req, res) => {
-    const filename = req.params.filename;
-    const filePath = path.join(uploadsDir, filename);
-    
-    if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ error: 'Không tìm thấy file' });
-    }
-
-    res.download(filePath, filename, (err) => {
-        if (err) {
-            console.error('Download error:', err);
-            res.status(500).json({ error: 'Tải về thất bại' });
-        }
-        
-        // Clean up file after download
-        setTimeout(() => {
-            try {
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                }
-            } catch (cleanupErr) {
-                console.error('Cleanup error:', cleanupErr);
-            }
-        }, 5000); // Delete file after 5 seconds
-    });
-});
-
-// Phase 2 Dashboard Routes
+// Dashboard Routes
 app.post('/api/dashboard/upload', upload.single('excelFile'), async (req, res) => {
     try {
         if (!req.file) {
@@ -508,9 +383,9 @@ async function translateConversationText(text, sourceContext = '', tags = '') {
         return translationCache.get(cacheKey);
     }
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
+    const genAI = new GoogleGenAI({
+        apiKey: GEMINI_API_KEY,
+    });
     const prompt = `You are an Advanced Localization Intelligence. Your goal is to process and translate customer feedback into natural, easy-to-read Vietnamese. 
 
 ### CORE PROCESSING RULES:
@@ -546,8 +421,11 @@ ${text}
 VIETNAMESE TRANSLATION:`;
 
     try {
-        const result = await model.generateContent(prompt);
-        const translatedText = result.response.text().trim();
+        const result = await genAI.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: [prompt]
+        });
+        const translatedText = result.text;
         
         // Cache the translation
         translationCache.set(cacheKey, translatedText);
@@ -641,10 +519,9 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🌐 Customer Voice Consolidation Tool - Full Platform`);
+    console.log(`🌐 Customer Voice Dashboard`);
     console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📊 Phase 1 (Consolidation): http://localhost:${PORT}/consolidate`);
-    console.log(`📈 Phase 2 (Dashboard): http://localhost:${PORT}/dashboard`);
+    console.log(`📈 Dashboard: http://localhost:${PORT}/dashboard`);
     console.log(`📁 Upload directory: ${uploadsDir}`);
 });
 

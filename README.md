@@ -1,44 +1,29 @@
-# 📊 Customer Voice Platform
+# 📊 Customer Voice Dashboard
 
-A complete two-phase platform for Customer Voice (complaint) data management:
-
-- **Phase 1**: Clean, consolidate, and standardize data by merging duplicate Booking IDs
-- **Phase 2**: Executive dashboard with interactive reporting and data visualization
+An executive dashboard platform for Customer Voice (complaint) data management with interactive reporting and AI-powered Vietnamese translation.
 
 ## 🎯 Features
 
-### Phase 1 - Data Consolidation
-- **Booking ID Consolidation**: Merge multiple records with the same Booking ID
-- **Smart Data Merging**: Combine sources, tags, and conversations intelligently
-- **Multiple Interfaces**: CLI, Web interface, and programmatic API
-- **Language Support**: English, Vietnamese, German with UTF-8 encoding
-- **Vietnamese Translation**: Automatically translate Tags and Sources to Vietnamese
-- **Multiple Translation Formats**: Vietnamese-only, Bilingual, or Side-by-side columns
-- **Large File Handling**: Process files with 10,000+ rows efficiently
-- **Two Merge Modes**: Full merge or AI-powered smart summaries
-
-### Phase 2 - Executive Dashboard
+### Executive Dashboard
 - **Interactive Dashboard**: Executive-friendly KPI overview and visualizations
-- **Data Exploration**: Filter, search, and sort consolidated complaint data
+- **Data Exploration**: Filter, search, and sort complaint data
 - **Visual Analytics**: Charts showing complaint patterns by tag, source, and tour
 - **Detailed Views**: Click-through to individual complaint details
 - **AI Translation**: On-demand Vietnamese translation of conversation text using Google Gemini
 - **Real-time Filtering**: Dynamic data filtering without page reloads
 - **Responsive Design**: Works on desktop and mobile devices
+- **Auto-load Test Data**: Automatically loads default test file on startup
 
 ## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-# Clone or download the project
-cd customer-voice-consolidation-tool
-
 # Install dependencies
 npm install
 ```
 
-### AI Translation Setup (Optional - Phase 2)
+### AI Translation Setup (Optional)
 
 For Vietnamese translation of conversation text in the dashboard:
 
@@ -51,63 +36,22 @@ For Vietnamese translation of conversation text in the dashboard:
    # Linux/Mac
    export GEMINI_API_KEY=your_api_key_here
    ```
-3. **See detailed setup**: Check `ENV_SETUP.md` for full instructions
 
 > **Note**: Translation feature works without API key configuration, but will show an error when attempting to translate.
 
-### Usage Options
-
-#### 1. Command Line Interface (CLI) - Phase 1
+### Usage
 
 ```bash
-# Basic processing
-npm run cli -- process -i "input.xlsx"
+# Start the dashboard server
+npm start
 
-# With Vietnamese translation
-npm run cli -- process -i "input.xlsx" -t
-
-# Bilingual output (English → Vietnamese)
-npm run cli -- process -i "input.xlsx" -t --output-format bilingual
-
-# Side-by-side columns (EN and VI)
-npm run cli -- process -i "input.xlsx" -t --output-format side-by-side
-
-# Use smart merge mode with translation
-npm run cli -- process -i "input.xlsx" -m smart -t
-
-# Analyze file before processing
-npm run cli -- analyze -i "input.xlsx"
-
-# See all options
-npm run cli -- help
-```
-
-#### 2. Web Platform - Both Phases
-
-```bash
-# Start web server
+# Or
 npm run web
 
-# Phase 1 - Data Consolidation: http://localhost:3000/consolidate
-# Phase 2 - Executive Dashboard: http://localhost:3000/dashboard
+# Access dashboard at: http://localhost:3000
 ```
 
-#### 3. Programmatic Usage
-
-```javascript
-const { processFile, analyzeFile } = require('./index.js');
-
-// Analyze file
-const analysis = await analyzeFile('input.xlsx');
-console.log(`Found ${analysis.duplicateBookingIds} duplicate booking IDs`);
-
-// Process file
-const result = await processFile('input.xlsx', 'output.xlsx', {
-    mergeMode: 'smart',
-    separator: ' | '
-});
-console.log(`Reduced ${result.original} to ${result.consolidated} records`);
-```
+The dashboard will automatically load the default test file (`uploads/test.xlsx`) on page load.
 
 ## 📋 Input Requirements
 
@@ -115,218 +59,146 @@ console.log(`Reduced ${result.original} to ${result.consolidated} records`);
 
 Your Excel file must contain these columns (case-insensitive):
 
-| Column Name       | Description                              |
-| ----------------- | ---------------------------------------- |
-| Supplier ID       | Supplier identifier                      |
-| Tour ID           | Tour identifier                          |
-| Tour Title        | Tour name                                |
-| Source            | Feedback source (e.g. care_chat, review) |
-| Tags              | Complaint tags                           |
-| Conversation Text | Customer message or chat transcript      |
-| Checkout Date     | Checkout date                            |
-| Booking ID        | Booking identifier (**required**)        |
+| Column Name                | Description                              |
+| -------------------------- | ---------------------------------------- |
+| Supplier ID                | Supplier identifier                      |
+| Tour ID                    | Tour identifier                          |
+| Tour Title                 | Tour name                                |
+| Booking ID                 | Booking identifier (**required**)        |
+| Checkout Date              | Checkout date                            |
+| Source (Merged)            | Feedback source (e.g. care_chat, review) |
+| Tags (Merged)              | Complaint tags                           |
+| Complaint Count            | Number of complaints                     |
+| Conversation Text (Merged) | Customer message or chat transcript      |
 
-## ⚙️ Processing Rules
+## 📊 Dashboard Features
 
-### Consolidation Logic
+### KPI Summary
 
-- **Booking ID**: Groups all records with the same ID
-- **Supplier ID, Tour ID, Tour Title, Checkout Date**: Uses first available value
-- **Source**: Merges all unique sources with semicolon separator
-- **Tags**: Combines all unique tags, removes duplicates
-- **Conversation Text**: Two modes available
+The dashboard displays an executive overview with the following metrics:
 
-### Vietnamese Translation Feature
+- **Tổng số booking có khiếu nại** (Total bookings with complaints)
+- **Tổng số khiếu nại** (Total complaints)
+- **Số lượng tour bị ảnh hưởng** (Number of affected tours)
+- **Số lượng tag khiếu nại** (Number of complaint tags)
+- **Phân bổ khiếu nại theo nguồn** (Complaint distribution by source)
 
-#### **Source Translation**
-| English | Vietnamese |
-|---------|------------|
-| relay | Tin nhắn khách hàng |
-| care_chat | Hỗ trợ khách hàng |
-| review | review |
+### Visual Components
 
-#### **Tag Translation** 
-Supports 20+ predefined complaint categories:
-- Unclear Pickup Information → Thông tin đón khách không rõ ràng
-- Supplier Not Responsive → Nhà cung cấp không phản hồi  
-- Activity Not As Advertised → Hoạt động không đúng như quảng cáo
-- And many more...
+- **Biểu đồ cột**: Complaints by Tag
+- **Biểu đồ tròn**: Complaints by Source
+- **Danh sách tour**: Tours with most complaints
 
-#### **Translation Output Formats**
+### Interactive Data Table
 
-**1. Vietnamese Only** (Default)
+#### Table Features
+
+- **Sắp xếp**: Sort by date, complaint count
+- **Lọc theo**:
+  - Tour
+  - Tag
+  - Source
+  - Date range
+- **Tìm kiếm**: Keyword search
+- **Chi tiết**: Click row to view full complaint details
+
+### AI Translation Feature
+
+#### Overview
+
+Provides **AI-powered translation** of conversation text from English/German to Vietnamese using Google Gemini.
+
+#### How to Use
+
+1. Click on any complaint row to view details
+2. Click **"Dịch sang tiếng Việt"** button
+3. View side-by-side original and translated text
+4. Copy translation to clipboard if needed
+
+#### Features
+
+- **Context-aware translation**: Uses complaint tags for more accurate translation
+- **Smart caching**: Reduces API calls by caching translations
+- **Side-by-side view**: Compare original and translated text
+- **Speaker label translation**: Converts "customer:" → "Khách hàng:", etc.
+- **Source label translation**: [care_chat] → [Hỗ trợ khách hàng]
+
+### Enhanced Readability
+
+The conversation text display is optimized for senior users with:
+- Large font sizes (1.35rem)
+- High line spacing (2.1)
+- High contrast colors
+- Clean white background
+- Professional appearance
+
+## 📁 File Structure
+
 ```
-Thông tin đón khách không rõ ràng; Nhà cung cấp không phản hồi
-```
-
-**2. Bilingual** (English → Vietnamese)  
-```
-Unclear Pickup Information → Thông tin đón khách không rõ ràng; Supplier Not Responsive → Nhà cung cấp không phản hồi
-```
-
-**3. Side-by-Side** (Separate columns)
-```
-| Tags (EN)                    | Tags (VI)                          |
-|------------------------------|------------------------------------ |
-| Unclear Pickup Information   | Thông tin đón khách không rõ ràng  |
-```
-
-### Merge Modes
-
-#### Full Merge (Default)
-```
-[care_chat]
-- customer: Hi, I booked a tour...
-- customer: Please confirm the pickup address
-
-[review]
-- The tour was not as advertised...
-```
-
-#### Smart Summary
-```
-Summary:
-Customer experienced confusion regarding hotel pickup and did not receive timely confirmation from the supplier.
-
-Key Issues:
-- Unclear pickup location
-- Supplier not responsive
-```
-
-## 📤 Output Format
-
-The consolidated Excel file includes:
-
-| Column                                | Description                           |
-| ------------------------------------- | ------------------------------------- |
-| Supplier ID                           | Original supplier identifier          |
-| Tour ID                               | Original tour identifier              |
-| Tour Title                            | Original tour name                    |
-| Booking ID                            | Unique booking identifier             |
-| Checkout Date                         | Original checkout date                |
-| Source (Merged)                       | All sources separated by `;`          |
-| Tags (Merged)                         | All unique tags separated by `;`      |
-| Complaint Count                       | Number of original records merged     |
-| Conversation Text (Merged or Summary) | Consolidated conversation content     |
-
-## 🛠️ CLI Commands
-
-### Process Command
-```bash
-npm run cli -- process [options]
-
-Options:
-  -i, --input <file>      Input Excel file path (required)
-  -o, --output <file>     Output Excel file path (optional)
-  -m, --mode <mode>       Merge mode: full or smart (default: full)
-  --separator <sep>       Separator for merged fields (default: ;)
+customer-voice-dashboard/
+├── server.js                  # Web server with dashboard API
+├── public/
+│   └── dashboard.html         # Dashboard interface
+├── uploads/
+│   └── test.xlsx              # Default test data file
+├── package.json               # Project dependencies
+└── README.md                  # This file
 ```
 
-### Analyze Command
-```bash
-npm run cli -- analyze -i <file>
+## ⚙️ Configuration
 
-Shows statistics about duplicate Booking IDs without processing
-```
+### Environment Variables
 
-### Examples Command
-```bash
-npm run cli -- help-examples
+- `PORT`: Server port (default: 3000)
+- `GEMINI_API_KEY`: Google Gemini API key for translation
 
-Shows detailed usage examples
-```
+### Default Test File
 
-## 🌐 Web Interface
+Place your default Excel file at `uploads/test.xlsx` to enable auto-load on dashboard startup.
 
-Start the web server and access the intuitive drag-and-drop interface:
+## 📤 Uploading Data
 
-```bash
-npm run web
-# Open http://localhost:3000
-```
+You can upload your own Excel files through the dashboard interface:
 
-### Phase 1 - Consolidation Features:
-- Drag & drop file upload
-- Real-time analysis
-- Processing options with Vietnamese translation
-- Automatic file download
+1. Click the upload button
+2. Select your Excel file
+3. Dashboard will update with your data
 
-### Phase 2 - Dashboard Features:
-- Upload consolidated Excel file
-- Interactive KPI dashboard
-- Filter and search complaints
-- **AI Translation**: Click "Dịch sang tiếng Việt" in complaint details
-  - Translates English/German to Vietnamese
-  - **Context-aware**: Uses complaint tags for more accurate translation
-  - Side-by-side view of original and translated text
-  - Copy translation to clipboard
-  - Smart caching to minimize API calls
+## 🔧 Technical Stack
 
-## 🔄 Two-Phase Workflow
+- **Backend**: Node.js + Express
+- **Excel Processing**: ExcelJS
+- **AI Translation**: Google Generative AI (Gemini)
+- **Frontend**: Vanilla JavaScript + Chart.js
 
-### Phase 1: Data Consolidation
-**Before Consolidation:**
-```
-Booking ID: ABC123 (3 records)
-- Record 1: care_chat source, "Pickup confusion" tag
-- Record 2: review source, "Late response" tag  
-- Record 3: care_chat source, "Hotel location" tag
-```
+## 📝 Use Cases
 
-**After Consolidation:**
-```
-Booking ID: ABC123 (1 record)
-- Source: care_chat; review
-- Tags: Pickup confusion; Late response; Hotel location
-- Complaint Count: 3
-- Merged conversations with clear source separation
-```
-
-### Phase 2: Executive Reporting
-**Upload the consolidated file to the dashboard to get:**
-- 📊 Executive KPI overview (total complaints, affected tours, etc.)
-- 📈 Visual charts showing complaint patterns and trends
-- 🔍 Interactive data table with filtering and search
-- 📋 Detailed complaint views for investigation
-- 🎯 Management-ready insights for decision making
+- Management dashboard for complaint overview
+- Supplier performance review meetings
+- Operations team daily monitoring
+- Quality improvement planning
+- Trend analysis for customer satisfaction initiatives
 
 ## ⚡ Performance
 
 - Handles files with 10,000+ rows
-- Processing time typically under 30 seconds
-- Memory efficient streaming for large datasets
-- Original files remain unchanged
+- Loading time typically under 5 seconds
+- Memory efficient data processing
+- Real-time filtering and search
 
-## 🔧 Configuration Options
+## 🌐 Browser Support
 
-```javascript
-const options = {
-    mergeMode: 'full',        // 'full' or 'smart'
-    separator: ';',           // Field separator
-    tagSeparator: ';'         // Tag separator
-};
-```
-
-## 📝 Use Cases
-
-### Phase 1 - Data Processing
-- Raw data consolidation from multiple platforms (GetYourGuide, Klook, KKday)
-- Duplicate booking record cleanup and merging
-- Multi-language complaint text standardization
-
-### Phase 2 - Executive Reporting
-- Management dashboard for complaint overview
-- Supplier performance review meetings
-- Operations team daily monitoring
-- Quality improvement planning and decision making
-- Trend analysis for customer satisfaction initiatives
+- Chrome (recommended)
+- Firefox
+- Edge
+- Safari
 
 ## 🤝 Support
 
 For issues or questions:
-1. Check the example files in the project
-2. Use `npm run cli -- help-examples` for usage examples
-3. Analyze your file first with `npm run cli -- analyze`
+1. Check that your Excel file matches the required format
+2. Ensure the default test file exists at `uploads/test.xlsx`
+3. Verify GEMINI_API_KEY is set if using translation
 
 ## 📄 License
 
@@ -335,4 +207,3 @@ MIT License - feel free to use and modify as needed.
 ---
 
 Made with ❤️ for better customer voice analysis
-
