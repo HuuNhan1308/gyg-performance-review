@@ -3,12 +3,35 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const ExcelJS = require('exceljs');
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const helmet = require('helmet');
+const compression = require('compression');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Security and performance middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
+            scriptSrcAttr: ["'unsafe-inline'"], // Allow inline event handlers like onclick
+            connectSrc: ["'self'", "https://cdn.jsdelivr.net"], // Allow CDN connections
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+}));
+app.use(compression());
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    credentials: true
+}));
 
 // Translation cache to avoid repeated API calls
 const translationCache = new Map();
@@ -383,9 +406,9 @@ async function translateConversationText(text, sourceContext = '', tags = '') {
         return translationCache.get(cacheKey);
     }
 
-    const genAI = new GoogleGenAI({
-        apiKey: GEMINI_API_KEY,
-    });
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    
     const prompt = `You are an Advanced Localization Intelligence. Your goal is to process and translate customer feedback into natural, easy-to-read Vietnamese. 
 
 ### CORE PROCESSING RULES:
@@ -421,11 +444,9 @@ ${text}
 VIETNAMESE TRANSLATION:`;
 
     try {
-        const result = await genAI.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: [prompt]
-        });
-        const translatedText = result.text;
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const translatedText = response.text().trim();
         
         // Cache the translation
         translationCache.set(cacheKey, translatedText);
